@@ -32,7 +32,6 @@ class _MyDialPadWidget extends State<DialPadWidget>
     // Clod: acá le podría poner el callback para que se registre automágicamente
     // ni bien termina de armar el widget.
     // Tal vez se podría acceder a la pantalla de settings con una secuencia de números...
-
   }
 
   void _loadSettings() async {
@@ -53,6 +52,57 @@ class _MyDialPadWidget extends State<DialPadWidget>
   Future<Widget?> _handleCall(BuildContext context,
       [bool voiceOnly = false]) async {
     var dest = _textController?.text;
+    if (defaultTargetPlatform == TargetPlatform.android ||
+        defaultTargetPlatform == TargetPlatform.iOS) {
+      await Permission.microphone.request();
+      await Permission.camera.request();
+    }
+    if (dest == null || dest.isEmpty) {
+      showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Target is empty.'),
+            content: Text('Please enter a SIP URI or username!'),
+            actions: <Widget>[
+              TextButton(
+                child: Text('Ok'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+      return null;
+    }
+
+    final mediaConstraints = <String, dynamic>{'audio': true, 'video': true};
+
+    MediaStream mediaStream;
+
+    if (kIsWeb && !voiceOnly) {
+      mediaStream =
+          await navigator.mediaDevices.getDisplayMedia(mediaConstraints);
+      mediaConstraints['video'] = false;
+      MediaStream userStream =
+          await navigator.mediaDevices.getUserMedia(mediaConstraints);
+      mediaStream.addTrack(userStream.getAudioTracks()[0], addToNative: true);
+    } else {
+      mediaConstraints['video'] = !voiceOnly;
+      mediaStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
+    }
+
+    helper!.call(dest, voiceonly: voiceOnly, mediaStream: mediaStream);
+    _preferences.setString('dest', dest);
+    return null;
+  }
+
+  Future<Widget?> _handleOneButtonCall(BuildContext context, String? destination,
+      [bool voiceOnly = true]) async {
+    var dest = destination;
     if (defaultTargetPlatform == TargetPlatform.android ||
         defaultTargetPlatform == TargetPlatform.iOS) {
       await Permission.microphone.request();
@@ -178,35 +228,44 @@ class _MyDialPadWidget extends State<DialPadWidget>
                     )),
               ])),
       Container(
-          width: 300,
-          child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: _buildNumPad())),
-      Container(
-          width: 300,
-          child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  ActionButton(
-                    icon: Icons.videocam,
-                    onPressed: () => _handleCall(context),
-                  ),
-                  ActionButton(
-                    icon: Icons.dialer_sip,
-                    fillColor: Colors.green,
-                    onPressed: () => _handleCall(context, true),
-                  ),
-                  ActionButton(
-                    icon: Icons.keyboard_arrow_left,
-                    onPressed: () => _handleBackSpace(),
-                    onLongPress: () => _handleBackSpace(true),
-                  ),
-                ],
-              )))
+        width: 300,
+        child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            // children: _buildNumPad(),
+            children: [
+              ElevatedButton(
+                onPressed: () {_handleOneButtonCall(context, "650");},
+                child: Text("Llamar"),
+              )
+            ]),
+      ),
+      // Container(
+      //   width: 300,
+      //   child: Padding(
+      //     padding: const EdgeInsets.all(12),
+      //     child: Row(
+      //       crossAxisAlignment: CrossAxisAlignment.center,
+      //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      //       children: <Widget>[
+      //         ActionButton(
+      //           icon: Icons.videocam,
+      //           onPressed: () => _handleCall(context),
+      //         ),
+      //         ActionButton(
+      //           icon: Icons.dialer_sip,
+      //           fillColor: Colors.green,
+      //           onPressed: () => _handleCall(context, true),
+      //         ),
+      //         ActionButton(
+      //           icon: Icons.keyboard_arrow_left,
+      //           onPressed: () => _handleBackSpace(),
+      //           onLongPress: () => _handleBackSpace(true),
+      //         ),
+      //       ],
+      //     ),
+      //   ),
+      // )
     ];
   }
 
@@ -279,19 +338,28 @@ class _MyDialPadWidget extends State<DialPadWidget>
                     Padding(
                       padding: const EdgeInsets.all(6.0),
                       child: Center(
-                          child: Text(
-                        'Status: ${EnumHelper.getName(helper!.registerState.state)}',
-                        style: TextStyle(fontSize: 14, color: Colors.black54),
-                      )),
+                          // child: Text(
+                          //   'Status: ${EnumHelper.getName(helper!.registerState.state)}',
+                          //   style: TextStyle(fontSize: 14, color: Colors.black54),
+                          // ),
+                          child: Icon(Icons.add_circle,
+                              color: (EnumHelper.getName(
+                                          helper!.registerState.state) ==
+                                      'Registered'
+                                  ? Colors.green
+                                  : Colors.red),
+                              size: 48.0)),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(6.0),
-                      child: Center(
-                          child: Text(
-                        'Received Message: $receivedMsg',
-                        style: TextStyle(fontSize: 14, color: Colors.black54),
-                      )),
-                    ),
+                    // Padding(
+                    //   padding: const EdgeInsets.all(6.0),
+                    //   child: Center(
+                    //     child: Text(
+                    //       'Received Message: $receivedMsg',
+                    //       style: const TextStyle(
+                    //           fontSize: 14, color: Colors.black54),
+                    //     ),
+                    //   ),
+                    // ),
                     Container(
                         child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
