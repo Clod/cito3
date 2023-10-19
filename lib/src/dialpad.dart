@@ -100,7 +100,8 @@ class _MyDialPadWidget extends State<DialPadWidget>
     return null;
   }
 
-  Future<Widget?> _handleOneButtonCall(BuildContext context, String? destination,
+  Future<Widget?> _handleOneButtonCall(
+      BuildContext context, String? destination,
       [bool voiceOnly = true]) async {
     var dest = destination;
     if (defaultTargetPlatform == TargetPlatform.android ||
@@ -192,18 +193,24 @@ class _MyDialPadWidget extends State<DialPadWidget>
     ];
 
     return labels
-        .map((row) => Padding(
-            padding: const EdgeInsets.all(12),
+        .map(
+          (row) => Padding(
+            padding: const EdgeInsets.all(12.0),
             child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: row
-                    .map((label) => ActionButton(
-                          title: label.keys.first,
-                          subTitle: label.values.first,
-                          onPressed: () => _handleNum(label.keys.first),
-                          number: true,
-                        ))
-                    .toList())))
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: row
+                  .map(
+                    (label) => ActionButton(
+                      title: label.keys.first,
+                      subTitle: label.values.first,
+                      onPressed: () => _handleNum(label.keys.first),
+                      number: true,
+                    ),
+                  )
+                  .toList(),
+            ),
+          ),
+        )
         .toList();
   }
 
@@ -235,8 +242,16 @@ class _MyDialPadWidget extends State<DialPadWidget>
             // children: _buildNumPad(),
             children: [
               ElevatedButton(
-                onPressed: () {_handleOneButtonCall(context, "650");},
-                child: Text("Llamar"),
+                onPressed: () {
+                  _handleOneButtonCall(context, "500", false);
+                },
+                child: Text("Llamar Seguridad"),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  _handleOneButtonCall(context, "650");
+                },
+                child: Text("Llamar Intendencia"),
               )
             ]),
       ),
@@ -272,102 +287,106 @@ class _MyDialPadWidget extends State<DialPadWidget>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text("Cito 3 SIP Client"),
-          actions: <Widget>[
-            PopupMenuButton<String>(
-                onSelected: (String value) {
-                  switch (value) {
-                    case 'account':
-                      Navigator.pushNamed(context, '/register');
-                      break;
-                    case 'about':
-                      Navigator.pushNamed(context, '/about');
-                      break;
-                    default:
-                      break;
-                  }
-                },
-                icon: Icon(Icons.menu),
-                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                      PopupMenuItem(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: <Widget>[
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                              child: Icon(
-                                Icons.account_circle,
-                                color: Colors.black38,
-                              ),
-                            ),
-                            SizedBox(
-                              child: Text('Account'),
-                              width: 64,
-                            )
-                          ],
-                        ),
-                        value: 'account',
-                      ),
-                      PopupMenuItem(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: <Widget>[
-                            Icon(
-                              Icons.info,
+      appBar: AppBar(
+        title: Text("Cito 3 SIP Client"),
+        actions: <Widget>[
+          PopupMenuButton<String>(
+              onSelected: (String value) {
+                switch (value) {
+                  case 'account':
+                    Navigator.pushNamed(context, '/register');
+                    break;
+                  case 'about':
+                    Navigator.pushNamed(context, '/about');
+                    break;
+                  default:
+                    break;
+                }
+              },
+              icon: Icon(Icons.menu),
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                    PopupMenuItem(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: <Widget>[
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                            child: Icon(
+                              Icons.account_circle,
                               color: Colors.black38,
                             ),
-                            SizedBox(
-                              child: Text('About'),
-                              width: 64,
-                            )
-                          ],
-                        ),
-                        value: 'about',
-                      )
-                    ]),
-          ],
-        ),
-        body: Align(
-            alignment: Alignment(0, 0),
-            child: SingleChildScrollView(
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.all(6.0),
-                      child: Center(
-                          // child: Text(
-                          //   'Status: ${EnumHelper.getName(helper!.registerState.state)}',
-                          //   style: TextStyle(fontSize: 14, color: Colors.black54),
-                          // ),
-                          child: Icon(Icons.add_circle,
-                              color: (EnumHelper.getName(
-                                          helper!.registerState.state) ==
-                                      'Registered'
-                                  ? Colors.green
-                                  : Colors.red),
-                              size: 48.0)),
+                          ),
+                          SizedBox(
+                            child: Text('Account'),
+                            width: 64,
+                          )
+                        ],
+                      ),
+                      value: 'account',
                     ),
-                    // Padding(
-                    //   padding: const EdgeInsets.all(6.0),
-                    //   child: Center(
-                    //     child: Text(
-                    //       'Received Message: $receivedMsg',
-                    //       style: const TextStyle(
-                    //           fontSize: 14, color: Colors.black54),
-                    //     ),
-                    //   ),
-                    // ),
-                    Container(
-                        child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: _buildDialPad(),
-                    )),
+                    PopupMenuItem(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: <Widget>[
+                          Icon(
+                            Icons.info,
+                            color: Colors.black38,
+                          ),
+                          SizedBox(
+                            child: Text('About'),
+                            width: 64,
+                          )
+                        ],
+                      ),
+                      value: 'about',
+                    )
                   ]),
-            )));
+        ],
+      ),
+      body: Align(
+        alignment: Alignment(0, 0),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(6.0),
+                child: Center(
+                    // child: Text(
+                    //   'Status: ${EnumHelper.getName(helper!.registerState.state)}',
+                    //   style: TextStyle(fontSize: 14, color: Colors.black54),
+                    // ),
+                    child: Icon(Icons.add_circle,
+                        color:
+                            (EnumHelper.getName(helper!.registerState.state) ==
+                                    'Registered'
+                                ? Colors.green
+                                : Colors.red),
+                        size: 48.0)),
+              ),
+              // Padding(
+              //   padding: const EdgeInsets.all(6.0),
+              //   child: Center(
+              //     child: Text(
+              //       'Received Message: $receivedMsg',
+              //       style: const TextStyle(
+              //           fontSize: 14, color: Colors.black54),
+              //     ),
+              //   ),
+              // ),
+              Container(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: _buildDialPad(),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override

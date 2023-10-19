@@ -320,14 +320,14 @@ class MyCallScreenWidget extends State<CallScreenWidget>
     });
   }
 
-  // void _toggleSpeaker() {
-  //   if (_localStream != null) {
-  //     _speakerOn = !_speakerOn;
-  //     if (!kIsWeb) {
-  //       _localStream!.getAudioTracks()[0].enableSpeakerphone(_speakerOn);
-  //     }
-  //   }
-  // }
+  void _toggleSpeaker() {
+    //   if (_localStream != null) {
+    //     _speakerOn = !_speakerOn;
+    //     if (!kIsWeb) {
+    _localStream!.getAudioTracks()[0].enableSpeakerphone(_speakerOn);
+    //     }
+    //   }
+  }
 
   List<Widget> _buildNumPad() {
     var labels = [
@@ -397,24 +397,32 @@ class MyCallScreenWidget extends State<CallScreenWidget>
       case CallStateEnum.CONNECTING:
         // Clod: Este es el botón de atender
         if (direction == 'INCOMING') {
+          _handleAccept();
+
+          // _toggleSpeaker();
+          //
+          // _switchCamera();
+
           debugPrint(
               "sonar el ring *****************************************************************");
 
           // FlutterRingtonePlayer.playRingtone(volume: 10.00);
 
-          FlutterRingtonePlayer.play(
-            android: AndroidSounds.notification,
-            ios: IosSounds.glass,
-            looping: false, // Android only - API >= 28
-            volume: 10.0, // Android only - API >= 28
-            asAlarm: false, // Android only - all APIs
-          );
-          basicActions.add(ActionButton(
-            title: "Accept",
-            fillColor: Colors.green,
-            icon: Icons.phone,
-            onPressed: () => _handleAccept(),
-          ));
+          // FlutterRingtonePlayer.play(
+          //   android: AndroidSounds.notification,
+          //   ios: IosSounds.glass,
+          //   looping: false, // Android only - API >= 28
+          //   volume: 10.0, // Android only - API >= 28
+          //   asAlarm: false, // Android only - all APIs
+          // );
+
+          // basicActions.add(ActionButton(
+          //   title: "Accept",
+          //   fillColor: Colors.green,
+          //   icon: Icons.phone,
+          //   onPressed: () => _handleAccept(),
+          // ));
+          // Clod _handleAccept();
           basicActions.add(hangupBtn);
         } else {
           basicActions.add(hangupBtn);
@@ -423,6 +431,11 @@ class MyCallScreenWidget extends State<CallScreenWidget>
       case CallStateEnum.ACCEPTED:
       case CallStateEnum.CONFIRMED:
         {
+          if (!voiceOnly) {
+            _toggleSpeaker(); // Esto parece estar andando. Al menos para entrantesq
+            _switchCamera();
+          }
+
           // advanceActions.add(
           //   ActionButton(
           //     title: _audioMuted ? 'unmute' : 'mute',
@@ -490,13 +503,13 @@ class MyCallScreenWidget extends State<CallScreenWidget>
               ),
             );
           } else {
-            basicActions.add(
-              ActionButton(
-                title: "transfer",
-                icon: Icons.phone_forwarded,
-                onPressed: () => _handleTransfer(),
-              ),
-            );
+            // basicActions.add(
+            //   ActionButton(
+            //     title: "transfer",
+            //     icon: Icons.phone_forwarded,
+            //     onPressed: () => _handleTransfer(),
+            //   ),
+            // );
           }
         }
         FlutterRingtonePlayer.stop();
